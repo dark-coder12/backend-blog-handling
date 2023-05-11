@@ -18,7 +18,7 @@ mongoose
   .then(() => {})
   .catch((error) => {});
 
-app.post("/api/register", async (req, res) => {
+app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
@@ -26,11 +26,11 @@ app.post("/api/register", async (req, res) => {
 
     if (existingUser) return res.status(409).json({ message: "Email Error" });
 
-    if (!email.contains("@") || !email.contains("."))
+    if (!email.includes("@") || !email.includes("."))
       return res.status(409).json({ message: "Invalid email" });
 
-    if (password.length < 6)
-      return res.status(409).json({ message: "Password should be > 6" });
+    if (password.length < 2)
+      return res.status(409).json({ message: "Password should be >= 2" });
 
     const user = new User({ name, email, password });
 
@@ -40,7 +40,7 @@ app.post("/api/register", async (req, res) => {
   } catch (error) {}
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -57,7 +57,7 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {}
 });
 
-app.get("/api/profile/:name", async (req, res) => {
+app.get("/profile/:name", async (req, res) => {
   try {
     const { name } = req.params;
 
@@ -71,14 +71,14 @@ app.get("/api/profile/:name", async (req, res) => {
   } catch (error) {}
 });
 
-app.put("/api/profile", async (req, res) => {
+app.put("/profile", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    if (!user || !email || !password)
+    if (!name || !email || !password)
       return res.status(409).json({ message: "Empty field error" });
 
-    if (user.length == 0 || email.length == 0 || password.length == 0)
+    if (name.length == 0 || email.length == 0 || password.length == 0)
       return res.status(409).json({ message: "Empty field error" });
 
     const user = await User.findOne({ email });
@@ -165,7 +165,6 @@ app.delete("/users/:email/posts/:postId", async (req, res) => {
     console.error(error);
   }
 });
-
 app.post("/users/:email/posts/:postId/comments", async (req, res) => {
   try {
     const { email, postId } = req.params;
@@ -184,7 +183,7 @@ app.post("/users/:email/posts/:postId/comments", async (req, res) => {
 
     await com.save();
 
-    res.status(201).json(com);
+    res.status(200).json(com);
   } catch (error) {}
 });
 
@@ -198,10 +197,12 @@ app.get("/users/:email/posts/:postId/comments", async (req, res) => {
       return res.status(404).json({ message: "Post doesnt exist" });
     }
 
-    const comments = await Comment.findMany({ postID: postId });
+    const comments = await Comment.find({ postID: postId });
 
     return res.status(200).json(comments);
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 app.listen(8080, () => {

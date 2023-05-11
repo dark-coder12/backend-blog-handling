@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb');
 
 const commentSchema = new mongoose.Schema({
 
     postID: {
-      type: ObjectId,
+      type: String,
       required: true
     },
     comment: {
